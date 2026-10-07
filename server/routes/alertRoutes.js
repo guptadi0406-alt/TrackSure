@@ -6,15 +6,17 @@ import {
   updateAlert
 } from "../controllers/alertController.js";
 
+import { authenticate } from "../middlewares/authMiddleware.js";
+import { authorize } from "../middlewares/roleMiddleware.js";
 
 const router = express.Router();
 
 
-router.get("/", getAlerts);
+router.get("/", authenticate, getAlerts);
 
-router.get("/:id", getAlertById);
+router.get("/:id", authenticate, getAlertById);
 
-router.patch("/:id", updateAlert);
+router.patch("/:id", authenticate, authorize("ADMIN", "MANAGER"), updateAlert);
 
 
 export default router;
