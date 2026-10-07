@@ -1,0 +1,13 @@
+{
+  "name": "traceguard-ai",
+  "version": "1.0.0",
+  "description": "TraceGuard AI — Early Lost-Parcel & Misplacement Detection Platform",
+  "scripts": {
+    "server": "npm --prefix server run dev",
+    "client": "npm --prefix client run dev",
+    "dev": "concurrently \"npm run server\" \"npm run client\""
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
