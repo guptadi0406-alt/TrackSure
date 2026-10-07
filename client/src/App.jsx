@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import {
   Bell, LayoutDashboard, Package, Map, BarChart3,
-  Settings, ChevronDown, ArrowUpRight, Clock3,
-  AlertTriangle, AlertCircle, ArrowRight, LogOut, RefreshCw,
+  Settings, ArrowUpRight, Clock3, Building2, Route,
+  AlertTriangle, AlertCircle, ArrowRight, LogOut, RefreshCw, FileSearch,
 } from "lucide-react";
 
 import { useAuth } from "./context/AuthContext";
@@ -11,6 +11,9 @@ import Login from "./pages/Login";
 import Parcels from "./pages/Parcels";
 import Alerts from "./pages/Alerts";
 import Analytics from "./pages/Analytics";
+import Facilities from "./pages/Facilities";
+import Routes from "./pages/Routes";
+import Investigations from "./pages/Investigations";
 
 // ── small helpers ──────────────────────────────────────
 function StatCard({ label, value, icon: Icon, iconBg, trend, trendLabel }) {
@@ -222,11 +225,13 @@ export default function App() {
   if (!isLoggedIn) return <Login />;
 
   const NAV = [
-    { id: "overview",  label: "Overview",  icon: LayoutDashboard },
-    { id: "parcels",   label: "Parcels",   icon: Package },
-    { id: "alerts",    label: "Alerts",    icon: Bell },
-    { id: "live-map",  label: "Live Map",  icon: Map },
-    { id: "analytics", label: "Analytics", icon: BarChart3 },
+    { id: "overview",        label: "Overview",        icon: LayoutDashboard },
+    { id: "parcels",         label: "Parcels",         icon: Package },
+    { id: "alerts",          label: "Alerts",          icon: Bell },
+    { id: "investigations",  label: "Investigations",  icon: FileSearch },
+    { id: "facilities",      label: "Facilities",      icon: Building2 },
+    { id: "routes",          label: "Routes",          icon: Route },
+    { id: "analytics",       label: "Analytics",       icon: BarChart3 },
   ];
 
   return (
@@ -304,11 +309,13 @@ export default function App() {
             </div>
           </header>
 
-          {activePage === "overview"  && <Overview />}
-          {activePage === "parcels"   && <Parcels />}
-          {activePage === "alerts"    && <Alerts />}
-          {activePage === "live-map"  && <PlaceholderPage title="Live Map" description="Real-time parcel movement across the network." />}
-          {activePage === "analytics" && <Analytics />}
+          {activePage === "overview"       && <Overview />}
+          {activePage === "parcels"        && <Parcels />}
+          {activePage === "alerts"         && <Alerts />}
+          {activePage === "investigations" && <Investigations />}
+          {activePage === "facilities"     && <Facilities />}
+          {activePage === "routes"         && <Routes />}
+          {activePage === "analytics"      && <Analytics />}
         </main>
       </div>
     </div>

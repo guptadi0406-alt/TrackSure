@@ -32,7 +32,7 @@ export default function Alerts() {
       const params = {};
       if (statusFilter) params.status = statusFilter;
       const { data } = await alertAPI.list(params);
-      setAlerts(data.alerts || []);
+      setAlerts(data.data || data.alerts || []);
     } catch {
       setAlerts([]);
     } finally {
