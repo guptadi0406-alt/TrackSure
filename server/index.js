@@ -19,5 +19,5 @@ app.use(express.json());
 
 const PORT = process.env.PORT || 3001;
 httpServer.listen(PORT, () => {
-  console.log(`🚀 TraceGuard Server running on http://localhost:${PORT}`);
+  console.log(`TraceGuard Server running on http://localhost:${PORT}`);
 });
