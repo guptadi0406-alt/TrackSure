@@ -6,7 +6,7 @@ import { Server } from 'socket.io';
 import { connectDB } from './db.js';
 import parcelRoutes from "./routes/parcelRoutes.js";
 import scanRoutes from "./routes/scanRoutes.js";
-
+import alertRoutes from "./routes/alertRoutes.js";
 
 const app = express();
 const httpServer = createServer(app);
@@ -21,6 +21,7 @@ connectDB();
 
 app.use("/api/parcels", parcelRoutes);
 app.use("/api/scans", scanRoutes);
+app.use("/api/alerts", alertRoutes);
 
 
 const PORT = process.env.PORT || 3000;
