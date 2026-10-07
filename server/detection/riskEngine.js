@@ -1,12 +1,13 @@
 import Parcel from "../models/Parcel.js";
 import ParcelScan from "../models/ParcelScan.js";
+import ParcelRisk from "../models/ParcelRisk.js";
 
 import detectDelay from "./delayDetector.js";
 import detectDwell from "./dwellDetector.js";
 import detectMissingScan from "./missingScanDetector.js";
 import detectRouteDeviation from "./routeDetector.js";
 import detectFacilityAnomaly from "./facilityDetector.js";
-
+import { createAlertsFromRisk } from "../services/alertService.js";
 
 const getSeverity = (score) => {
   if (score >= 85) return "CRITICAL";
@@ -18,6 +19,23 @@ const getSeverity = (score) => {
 };
 
 
+const getParcelStatus = (severity) => {
+  switch (severity) {
+    case "CRITICAL":
+      return "CRITICAL";
+
+    case "HIGH":
+    case "MEDIUM":
+      return "AT_RISK";
+
+    case "WATCH":
+    case "NORMAL":
+    default:
+      return "IN_TRANSIT";
+  }
+};
+
+
 const calculateConfidence = ({
   delay,
   dwell,
@@ -25,7 +43,6 @@ const calculateConfidence = ({
   route,
   facility
 }) => {
-  let confidence = 0;
 
   const detections = [
     delay,
@@ -36,40 +53,29 @@ const calculateConfidence = ({
   ];
 
   const detectedCount = detections.filter(
-    detection => detection.detected
+    detector => detector.detected
   ).length;
 
+  if (detectedCount === 0) return 95;
+  if (detectedCount === 1) return 70;
+  if (detectedCount === 2) return 82;
+  if (detectedCount === 3) return 90;
 
-
-  if (detectedCount === 0) {
-    confidence = 95;
-  } else if (detectedCount === 1) {
-    confidence = 70;
-  } else if (detectedCount === 2) {
-    confidence = 82;
-  } else if (detectedCount === 3) {
-    confidence = 90;
-  } else {
-    confidence = 95;
-  }
-
-  return confidence;
+  return 95;
 };
 
 
 const getLikelyFacility = async (parcelId) => {
+
   const parcel = await Parcel.findById(parcelId);
 
   if (!parcel) {
     return null;
   }
 
- 
-
   if (parcel.currentFacilityId) {
     return parcel.currentFacilityId;
   }
-
 
   const latestScan = await ParcelScan.findOne({
     parcelId: parcel._id
@@ -92,8 +98,6 @@ const riskEngine = async (parcelId) => {
   }
 
 
- 
-
   const [
     delayResult,
     dwellResult,
@@ -107,6 +111,8 @@ const riskEngine = async (parcelId) => {
     detectRouteDeviation(parcelId),
     detectFacilityAnomaly(parcelId)
   ]);
+
+
 
 
   const delayScore = delayResult.score || 0;
@@ -127,12 +133,19 @@ const riskEngine = async (parcelId) => {
   );
 
 
+
   const severity = getSeverity(totalScore);
 
 
 
 
+  const parcelStatus = getParcelStatus(severity);
+
+
+
+
   const likelyFacilityId = await getLikelyFacility(parcelId);
+
 
 
   const confidence = calculateConfidence({
@@ -144,8 +157,7 @@ const riskEngine = async (parcelId) => {
   });
 
 
-
-
+ 
   const reasons = [];
 
   if (delayResult.detected) {
@@ -168,10 +180,60 @@ const riskEngine = async (parcelId) => {
     reasons.push(facilityResult.reason);
   }
 
-
   if (reasons.length === 0) {
     reasons.push("No significant anomalies detected");
   }
+
+
+
+  const parcelRisk = await ParcelRisk.create({
+    parcelId: parcel._id,
+
+    score: totalScore,
+
+    severity,
+
+    delayScore,
+
+    dwellScore,
+
+    missingScanScore,
+
+    routeScore,
+
+    facilityScore,
+
+    likelyFacilityId,
+
+    confidence,
+
+    reasons,
+
+    calculatedAt: new Date()
+  });
+
+
+  const alerts = await createAlertsFromRisk({
+    parcelId: parcel._id,
+    severity,
+    detectors: {
+            delay: delayResult,
+            dwell: dwellResult,
+            missingScan: missingScanResult,
+            route: routeResult,
+            facility: facilityResult
+        }
+    }); 
+
+
+  parcel.status = parcelStatus;
+
+  if (likelyFacilityId) {
+    parcel.currentFacilityId = likelyFacilityId;
+  }
+
+  await parcel.save();
+
 
 
 
@@ -183,6 +245,8 @@ const riskEngine = async (parcelId) => {
     score: totalScore,
 
     severity,
+
+    status: parcelStatus,
 
     components: {
       delayScore,
@@ -196,7 +260,11 @@ const riskEngine = async (parcelId) => {
 
     confidence,
 
+
     reasons,
+
+    riskId: parcelRisk._id,
+    alerts,
 
     detectors: {
       delay: delayResult,
@@ -206,7 +274,7 @@ const riskEngine = async (parcelId) => {
       facility: facilityResult
     },
 
-    calculatedAt: new Date()
+    calculatedAt: parcelRisk.calculatedAt
   };
 };
 

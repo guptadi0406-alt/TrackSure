@@ -5,7 +5,7 @@ import { createServer } from 'http';
 import { Server } from 'socket.io';
 import { connectDB } from './db.js';
 import parcelRoutes from "./routes/parcelRoutes.js";
-
+import scanRoutes from "./routes/scanRoutes.js";
 
 
 const app = express();
@@ -20,6 +20,7 @@ app.use(express.json());
 connectDB();
 
 app.use("/api/parcels", parcelRoutes);
+app.use("/api/scans", scanRoutes);
 
 
 const PORT = process.env.PORT || 3000;
