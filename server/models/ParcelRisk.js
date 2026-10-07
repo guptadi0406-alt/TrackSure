@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 const parcelRiskSchema = new mongoose.Schema(
   {
@@ -90,4 +90,4 @@ parcelRiskSchema.index({
   calculatedAt: -1
 });
 
-module.exports = mongoose.model("ParcelRisk", parcelRiskSchema);
+export default mongoose.model("ParcelRisk", parcelRiskSchema);

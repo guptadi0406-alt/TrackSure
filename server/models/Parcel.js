@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 const parcelSchema = new mongoose.Schema(
   {
@@ -66,4 +66,4 @@ parcelSchema.index({
   currentFacilityId: 1
 });
 
-module.exports = mongoose.model("Parcel", parcelSchema);
+export default mongoose.model("Parcel", parcelSchema);

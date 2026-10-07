@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 const parcelScanSchema = new mongoose.Schema(
   {
@@ -55,4 +55,4 @@ parcelScanSchema.index({
   timestamp: 1
 });
 
-module.exports = mongoose.model("ParcelScan", parcelScanSchema);
+export default mongoose.model("ParcelScan", parcelScanSchema);

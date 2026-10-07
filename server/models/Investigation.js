@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 const investigationSchema = new mongoose.Schema(
   {
@@ -69,7 +69,7 @@ investigationSchema.index({
   status: 1
 });
 
-module.exports = mongoose.model(
+export default mongoose.model(
   "Investigation",
   investigationSchema
 );
